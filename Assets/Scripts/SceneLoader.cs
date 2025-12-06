@@ -7,6 +7,7 @@ public class SceneLoader : MonoBehaviour
 
     void Awake()
     {
+        // Singleton pattern
         if (Instance == null)
         {
             Instance = this;
@@ -18,17 +19,65 @@ public class SceneLoader : MonoBehaviour
         }
     }
 
-    public void LoadScene(string sceneName)
+    // Scene loading methods
+    public void LoadLoading()
     {
+        LoadScene("Loading");
+    }
+
+    public void LoadLogin()
+    {
+        LoadScene("Login");
+    }
+
+    public void LoadCharacterSelection()
+    {
+        LoadScene("CharacterSelection");
+    }
+
+    public void LoadMainMenu()
+    {
+        LoadScene("MainMenu");
+    }
+
+    public void LoadMemoryMatch()
+    {
+        LoadScene("MemoryMatch");
+    }
+
+    public void LoadPuzzleGame()
+    {
+        LoadScene("PuzzleGame");
+    }
+
+    public void LoadMathGame()
+    {
+        LoadScene("MathGame");
+    }
+
+    public void LoadSettings()
+    {
+        LoadScene("Settings");
+    }
+
+    // Base method
+    void LoadScene(string sceneName)
+    {
+        Debug.Log("Loading scene: " + sceneName);
         SceneManager.LoadScene(sceneName);
     }
 
-    public void LoadMainMenu() => LoadScene("MainMenu");
-    public void LoadLogin() => LoadScene("Login");
-    public void LoadCharacterSelection() => LoadScene("CharacterSelection");
-    public void LoadGameMenu() => LoadScene("GameMenu");
-    public void LoadMemoryMatch() => LoadScene("MemoryMatch");
-    public void LoadPuzzleGame() => LoadScene("PuzzleGame");
-    public void LoadColorMatch() => LoadScene("ColorMatch");
-    public void LoadSettings() => LoadScene("Settings");
+    // Reload current scene
+    public void ReloadCurrentScene()
+    {
+        Scene currentScene = SceneManager.GetActiveScene();
+        LoadScene(currentScene.name);
+    }
+
+    // Quit game (for testing/mobile)
+    public void QuitGame()
+    {
+        Debug.Log("Quitting game");
+        Application.Quit();
+    }
 }
