@@ -1,11 +1,11 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
-
+using TMPro;
 public class LoadingManager : MonoBehaviour
 {
     [Header("UI References")]
-    public Text loadingText;
+    public TMP_Text loadingText;
     public Image logo;
 
     private string baseText = "Loading";
