@@ -161,7 +161,7 @@ public class StarPopupManager : MonoBehaviour
     {
         if (AudioManager.Instance != null)
             AudioManager.Instance.PlayButtonClick();
-
+         
         if (popupPanel != null)
             popupPanel.SetActive(false);
 
