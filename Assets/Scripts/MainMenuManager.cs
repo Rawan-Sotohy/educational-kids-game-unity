@@ -8,8 +8,6 @@ public class MainMenuManager : MonoBehaviour
     public Button memoryMatchButton;
     public Button puzzleGameButton;
     public Button mathGameButton;
-    public Button settingsButton;
-    public Button logoutButton;
     public Image characterAvatar;
 
     void Start()
@@ -30,8 +28,6 @@ public class MainMenuManager : MonoBehaviour
             SceneLoader.Instance.LoadMathGame();
         });
 
-        settingsButton.onClick.AddListener(OpenSettings);
-        logoutButton.onClick.AddListener(Logout);
 
         // TODO: Load character avatar from Firebase when character selection is done
     }
