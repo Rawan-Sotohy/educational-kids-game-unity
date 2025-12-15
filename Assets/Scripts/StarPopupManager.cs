@@ -118,30 +118,38 @@ public class StarPopupManager : MonoBehaviour
 
     public void ShowStars(int starCount, string message)
     {
+        // If popup is null, try finding it again
+        if (popupPanel == null)
+        {
+            Debug.Log("⚠️ StarPopup was null, searching again...");
+            FindPopupInScene();
+
+            if (popupPanel != null)
+            {
+                SetupPopup();
+            }
+        }
+
         if (popupPanel == null)
         {
             Debug.LogError("❌ StarPopup not found in scene!");
             return;
         }
 
-        // Clamp stars 0-5
+        // Rest of the method...
         starCount = Mathf.Clamp(starCount, 0, 5);
 
-        // Set star sprites
         for (int i = 0; i < stars.Length; i++)
         {
             if (stars[i] != null)
                 stars[i].sprite = i < starCount ? starFull : starEmpty;
         }
 
-        // Set text
         if (scoreText != null)
             scoreText.text = message;
 
-        // Show popup
         popupPanel.SetActive(true);
 
-        // Play sound
         if (AudioManager.Instance != null)
             AudioManager.Instance.PlayWinFanfare();
     }

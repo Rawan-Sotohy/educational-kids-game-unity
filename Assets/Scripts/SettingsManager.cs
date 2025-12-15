@@ -82,14 +82,23 @@ public class SettingsManager : MonoBehaviour
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
-
     void FindPopupInScene()
     {
-        // Find the popup by name in any Canvas
+        Debug.Log("🔍 Searching for SettingsPopup...");
+
         Canvas[] canvases = FindObjectsOfType<Canvas>();
+        Debug.Log($"Found {canvases.Length} canvases in scene");
 
         foreach (Canvas canvas in canvases)
         {
+            Debug.Log($"Checking canvas: {canvas.name}");
+
+            // List all children of this canvas
+            for (int i = 0; i < canvas.transform.childCount; i++)
+            {
+                Debug.Log($"  - Child {i}: {canvas.transform.GetChild(i).name}");
+            }
+
             Transform popup = canvas.transform.Find("SettingsPopUp");
             if (popup != null)
             {
@@ -104,6 +113,12 @@ public class SettingsManager : MonoBehaviour
                 closeButtonTop = popup.Find("CloseButton")?.GetComponent<Button>();
                 closeButtonBottom = popup.Find("CharacterButton")?.GetComponent<Button>();
 
+                // Debug what was found
+                Debug.Log($"MusicSlider: {(musicSlider != null ? "✅" : "❌")}");
+                Debug.Log($"SFXSlider: {(sfxSlider != null ? "✅" : "❌")}");
+                Debug.Log($"CloseButton: {(closeButtonTop != null ? "✅" : "❌")}");
+                Debug.Log($"CharacterButton: {(closeButtonBottom != null ? "✅" : "❌")}");
+
                 // Find icons (Image components inside buttons)
                 if (musicMuteButton != null)
                     musicMuteIcon = musicMuteButton.transform.GetChild(0)?.GetComponent<Image>();
@@ -114,9 +129,8 @@ public class SettingsManager : MonoBehaviour
             }
         }
 
-        Debug.LogWarning("⚠️ SettingsPopup not found in scene! Add SettingsPopup prefab to Canvas.");
+        Debug.LogError("❌ SettingsPopup not found in scene! Add SettingsPopup prefab to Canvas.");
     }
-
     void SetupPopup()
     {
         // Hide popup
@@ -157,6 +171,18 @@ public class SettingsManager : MonoBehaviour
 
     public void OpenSettings()
     {
+        // If popup is null, try finding it again
+        if (settingsPopup == null)
+        {
+            Debug.Log("⚠️ Popup was null, searching again...");
+            FindPopupInScene();
+
+            if (settingsPopup != null)
+            {
+                SetupPopup();
+            }
+        }
+
         if (settingsPopup != null)
         {
             settingsPopup.SetActive(true);
@@ -164,7 +190,7 @@ public class SettingsManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError("❌ SettingsPopup is null! Make sure SettingsPopup prefab is in the Canvas.");
+            Debug.LogError("❌ SettingsPopup STILL null after re-search!");
         }
     }
 
