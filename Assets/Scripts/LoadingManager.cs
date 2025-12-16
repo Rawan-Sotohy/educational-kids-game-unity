@@ -25,6 +25,11 @@ public class LoadingManager : MonoBehaviour
             yield return new WaitForSeconds(0.4f);
         }
     }
+    void OnCharacterLoaded()
+    {
+        CharacterManager.Instance.OnCharacterDataLoaded -= OnCharacterLoaded;
+        SceneLoader.Instance.LoadMainMenu();
+    }
 
     IEnumerator LoadingFlow()
     {
@@ -44,12 +49,14 @@ public class LoadingManager : MonoBehaviour
         if (FirebaseManager.Instance.IsUserLoggedIn())
         {
             Debug.Log("✅ Auto-login success");
-            SceneLoader.Instance.LoadMainMenu();
+
+            CharacterManager.Instance.OnCharacterDataLoaded += OnCharacterLoaded;
+            CharacterManager.Instance.LoadFromFirebase();
         }
         else
         {
-            Debug.Log("❌ Not logged in");
             SceneLoader.Instance.LoadLogin();
         }
+
     }
 }

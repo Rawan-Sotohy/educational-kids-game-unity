@@ -20,6 +20,8 @@ public class CharacterManager : MonoBehaviour
     public string databaseURL = "https://educational-kids-game-un-4ef4d-default-rtdb.firebaseio.com";
 
     private DatabaseReference databaseRef;
+    public bool IsDataLoaded { get; private set; } = false;
+    public System.Action OnCharacterDataLoaded;
 
     void Awake()
     {
@@ -48,9 +50,13 @@ public class CharacterManager : MonoBehaviour
     /// </summary>
     public void LoadFromFirebase()
     {
+        IsDataLoaded = false;
+
         if (FirebaseManager.Instance == null || !FirebaseManager.Instance.IsUserLoggedIn())
         {
             Debug.Log("⚠️ Not logged in, using defaults");
+            IsDataLoaded = true;
+            OnCharacterDataLoaded?.Invoke();
             return;
         }
 
@@ -64,22 +70,28 @@ public class CharacterManager : MonoBehaviour
                 {
                     var snapshot = task.Result;
 
-                    // Load from Firebase or use defaults
                     playerName = snapshot.Child("name").Value?.ToString() ?? "Player";
 
                     string charStr = snapshot.Child("character").Value?.ToString() ?? "0";
-                    selectedCharacter = int.Parse(charStr);
+                    int.TryParse(charStr, out selectedCharacter);
 
-                    // Ensure valid range (0 or 1)
                     if (selectedCharacter < 0 || selectedCharacter >= characterSprites.Length)
                         selectedCharacter = 0;
 
-                    Debug.Log($"✅ Loaded: {playerName}, Character {selectedCharacter}");
+                    Debug.Log($"✅ Loaded from DB: {playerName}, Character {selectedCharacter}");
                 }
                 else
                 {
-                    Debug.Log("📝 No saved data, using defaults: Player, Character 0");
+                    Debug.Log("📝 No saved data, using defaults");
                 }
+
+                IsDataLoaded = true;
+
+                FirebaseManager.RunOnMainThread(() =>
+                {
+                    OnCharacterDataLoaded?.Invoke();
+                });
+
             });
     }
 

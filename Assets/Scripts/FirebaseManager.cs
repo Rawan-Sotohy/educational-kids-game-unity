@@ -51,7 +51,7 @@ public class FirebaseManager : MonoBehaviour
         }
     }
 
-    void RunOnMainThread(Action action)
+    public static void RunOnMainThread(Action action)
     {
         lock (mainThreadActions)
         {

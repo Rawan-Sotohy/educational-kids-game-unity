@@ -65,7 +65,7 @@ public class LoginManager : MonoBehaviour
         SetButtons(false);
         errorText.text = "Logging in...";
 
-        FirebaseManager.Instance.LoginUser(email, password, OnAuthResult);
+        FirebaseManager.Instance.LoginUser(email, password, OnLoginResult);
     }
 
     public void OnRegisterClicked()
@@ -85,7 +85,41 @@ public class LoginManager : MonoBehaviour
         SetButtons(false);
         errorText.text = "Creating account...";
 
-        FirebaseManager.Instance.RegisterUser(email, password, OnAuthResult);
+        FirebaseManager.Instance.RegisterUser(email, password, OnRegisterResult);
+    }
+    void OnLoginResult(bool success, string message)
+    {
+        isProcessing = false;
+
+        if (success)
+        {
+            SceneLoader.Instance.LoadMainMenu();
+        }
+        else
+        {
+            errorText.text = message;
+            SetButtons(true);
+        }
+    }
+
+    void OnRegisterResult(bool success, string message)
+    {
+        isProcessing = false;
+
+        if (success)
+        {
+            // Defaults should be saved immediately
+            CharacterManager.Instance.playerName = "Player";
+            CharacterManager.Instance.selectedCharacter = 0;
+            CharacterManager.Instance.SaveToFirebase();
+
+            SceneLoader.Instance.LoadCharacterSelection();
+        }
+        else
+        {
+            errorText.text = message;
+            SetButtons(true);
+        }
     }
 
     void OnAuthResult(bool success, string message)
@@ -95,15 +129,13 @@ public class LoginManager : MonoBehaviour
         if (success)
         {
             errorText.text = "";
-            SceneLoader.Instance.LoadCharacterSelection();
+
+            // LOGIN → MAIN MENU
+            SceneLoader.Instance.LoadMainMenu();
         }
         else
         {
-            if (message.Contains("exist"))
-                errorText.text = "User does not exist. Please register first.";
-            else
-                errorText.text = message;
-
+            errorText.text = message;
             SetButtons(true);
         }
     }

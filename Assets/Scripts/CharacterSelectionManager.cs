@@ -20,16 +20,39 @@ public class CharacterSelectionManager : MonoBehaviour
 
     void Start()
     {
-        // Button clicks
         character1Button.onClick.AddListener(() => SelectCharacter(0));
         character2Button.onClick.AddListener(() => SelectCharacter(1));
         confirmButton.onClick.AddListener(Confirm);
 
         errorText.text = "";
 
-        // Load current character data (if exists)
-        LoadCurrentCharacter();
+        if (CharacterManager.Instance != null)
+        {
+            if (CharacterManager.Instance.IsDataLoaded)
+            {
+                ApplyLoadedData();
+            }
+            else
+            {
+                CharacterManager.Instance.OnCharacterDataLoaded += ApplyLoadedData;
+            }
+        }
     }
+
+    void ApplyLoadedData()
+    {
+        if (CharacterManager.Instance == null) return;
+
+        nameInput.text = CharacterManager.Instance.playerName;
+
+        selectedChar = CharacterManager.Instance.selectedCharacter;
+        SelectCharacter(selectedChar);
+
+        Debug.Log($"🟢 UI updated: {nameInput.text}, Character {selectedChar}");
+
+        CharacterManager.Instance.OnCharacterDataLoaded -= ApplyLoadedData;
+    }
+
 
     void LoadCurrentCharacter()
     {
@@ -54,22 +77,24 @@ public class CharacterSelectionManager : MonoBehaviour
 
     void SelectCharacter(int index)
     {
+        if (CharacterManager.Instance == null) return;
+        if (index < 0 || index >= CharacterManager.Instance.characterSprites.Length)
+            index = 0;
+
         selectedChar = index;
 
-        // Show preview
-        if (CharacterManager.Instance != null && previewImage != null)
-        {
+        if (previewImage != null)
             previewImage.sprite = CharacterManager.Instance.characterSprites[index];
-        }
 
-        // Visual feedback - highlight selected button
         ResetButtonColors();
+
         Button selectedButton = index == 0 ? character1Button : character2Button;
         selectedButton.GetComponent<Image>().color = Color.yellow;
 
         if (AudioManager.Instance != null)
             AudioManager.Instance.PlayButtonClick();
     }
+
 
     void ResetButtonColors()
     {
