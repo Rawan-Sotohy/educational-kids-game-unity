@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
@@ -26,7 +26,30 @@ public class CharacterSelectionManager : MonoBehaviour
         confirmButton.onClick.AddListener(Confirm);
 
         errorText.text = "";
-        SelectCharacter(0); // Start with first character selected
+
+        // Load current character data (if exists)
+        LoadCurrentCharacter();
+    }
+
+    void LoadCurrentCharacter()
+    {
+        if (CharacterManager.Instance != null)
+        {
+            // Set name input to current name
+            nameInput.text = CharacterManager.Instance.playerName;
+
+            // Select current character
+            selectedChar = CharacterManager.Instance.selectedCharacter;
+            SelectCharacter(selectedChar);
+
+            Debug.Log($"📝 Loaded current: {CharacterManager.Instance.playerName}, Character {selectedChar}");
+        }
+        else
+        {
+            // Fallback defaults
+            nameInput.text = "Player";
+            SelectCharacter(0);
+        }
     }
 
     void SelectCharacter(int index)
