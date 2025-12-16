@@ -301,7 +301,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a28ebf9aee350847bc9d82035087415, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  characterSprites: []
+  characterSprites:
+  - {fileID: 206616964, guid: dcc0559a6592cf44a84adc0f5f7d9b0f, type: 3}
+  - {fileID: 1609762353, guid: 8c740b459bd1a554aa6b4f51279620bf, type: 3}
   playerName: Player
   selectedCharacter: 0
 --- !u!1 &206835929
