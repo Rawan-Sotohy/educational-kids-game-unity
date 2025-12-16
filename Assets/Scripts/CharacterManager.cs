@@ -29,8 +29,16 @@ public class CharacterManager : MonoBehaviour
         }
     }
 
+    [Header("Firebase Settings")]
+    public string databaseURL = "https://educational-kids-game-un-4ef4d-default-rtdb.firebaseio.com"; // PUT YOUR URL HERE!
+
+    private DatabaseReference databaseRef;
+
     void Start()
     {
+        // Initialize database with URL
+        databaseRef = FirebaseDatabase.GetInstance(databaseURL).RootReference;
+
         // Try to load saved data
         LoadFromFirebase();
     }
@@ -44,7 +52,7 @@ public class CharacterManager : MonoBehaviour
             return;
 
         string userId = FirebaseManager.Instance.GetCurrentUser().UserId;
-        FirebaseDatabase.DefaultInstance.RootReference
+        databaseRef
             .Child("users").Child(userId)
             .GetValueAsync().ContinueWith(task =>
             {
@@ -73,7 +81,7 @@ public class CharacterManager : MonoBehaviour
             { "character", selectedCharacter }
         };
 
-        FirebaseDatabase.DefaultInstance.RootReference
+        databaseRef
             .Child("users").Child(userId)
             .SetValueAsync(data).ContinueWith(task =>
             {
