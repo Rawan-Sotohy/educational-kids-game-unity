@@ -19,12 +19,19 @@ public class MathQuizManager : MonoBehaviour
     private int correctAnswers = 0;
     private int correctAnswer;
     private List<Question> questions = new List<Question>();
+    private Animator characterAnimator;
 
     void Start()
     {
         GenerateQuestions();
         DisplayQuestion();
         UpdateScoreUI();
+        characterAnimator = FindObjectOfType<Animator>();
+
+        if (characterAnimator == null)
+        {
+            Debug.LogWarning("⚠️ No CharacterAnimator found in scene!");
+        }
     }
 
     void GenerateQuestions()
@@ -156,15 +163,13 @@ public class MathQuizManager : MonoBehaviour
         if (selectedAnswer == correctAnswer)
         {
             correctAnswers++;
-            Debug.Log("✅ Correct!");
-
+            characterAnimator.SetTrigger("Happy");
             if (AudioManager.Instance != null)
                 AudioManager.Instance.PlayCorrect();
         }
         else
         {
-            Debug.Log("❌ Wrong!");
-
+            characterAnimator.SetTrigger("Sad");
             if (AudioManager.Instance != null)
                 AudioManager.Instance.PlayWrong();
         }

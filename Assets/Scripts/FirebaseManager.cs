@@ -116,7 +116,7 @@ public class FirebaseManager : MonoBehaviour
 
                 if (task.IsFaulted)
                 {
-                    callback(false, GetFirebaseErrorMessage(task.Exception));
+                    callback(false, "Invalid email or password.");
                     return;
                 }
 
@@ -150,7 +150,7 @@ public class FirebaseManager : MonoBehaviour
 
                 if (task.IsFaulted)
                 {
-                    callback(false, GetFirebaseErrorMessage(task.Exception));
+                    callback(false, "Invalid email or password.");
                     return;
                 }
 
@@ -190,18 +190,42 @@ public class FirebaseManager : MonoBehaviour
         {
             if (e is FirebaseException firebaseEx)
             {
-                switch ((AuthError)firebaseEx.ErrorCode)
+                AuthError errorCode = (AuthError)firebaseEx.ErrorCode;
+
+                switch (errorCode)
                 {
-                    case AuthError.InvalidEmail: return "Invalid email address!";
-                    case AuthError.WrongPassword: return "Wrong password!";
-                    case AuthError.UserNotFound: return "Account does not exist!";
-                    case AuthError.EmailAlreadyInUse: return "Email already registered!";
-                    case AuthError.WeakPassword: return "Password too weak (min 6 chars)";
-                    case AuthError.NetworkRequestFailed: return "Network error!";
-                    default: return $"Error: {(AuthError)firebaseEx.ErrorCode}";
+                    case AuthError.InvalidEmail:
+                        return "Invalid email address!";
+
+                    case AuthError.Failure:
+                        // Covers:
+                        // - wrong password
+                        // - user not found
+                        return "Invalid email or password.";
+
+                    case AuthError.EmailAlreadyInUse:
+                        return "Email already registered!";
+
+                    case AuthError.WeakPassword:
+                        return "Password too weak (min 6 chars)";
+
+                    case AuthError.NetworkRequestFailed:
+                        return "Network error! Check your connection.";
+
+                    case AuthError.TooManyRequests:
+                        return "Too many attempts. Try again later.";
+
+                    case AuthError.UserDisabled:
+                        return "This account has been disabled.";
+
+                    default:
+                        Debug.LogError($"Firebase Auth Error Code: {errorCode}");
+                        return "Authentication failed!";
                 }
             }
         }
+
         return "Authentication failed!";
     }
+
 }

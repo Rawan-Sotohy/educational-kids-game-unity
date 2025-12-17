@@ -55,12 +55,11 @@ public class SceneLoader : MonoBehaviour
         LoadScene("MathGame");
     }
 
-    public void LoadSettings()
-    {
-        LoadScene("Settings");
-    }
+    //public void LoadSettings()
+    //{
+    //    LoadScene("Settings");
+    //}
 
-    // Base method
     void LoadScene(string sceneName)
     {
         Debug.Log("Loading scene: " + sceneName);

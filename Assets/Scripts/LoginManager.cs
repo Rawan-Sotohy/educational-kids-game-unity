@@ -7,7 +7,7 @@ public class LoginManager : MonoBehaviour
     [Header("UI References")]
     public TMP_InputField emailInput;
     public TMP_InputField passwordInput;
-    public TMP_InputField confirmPasswordInput; // NEW
+    public TMP_InputField confirmPasswordInput;
     public TMP_Text errorText;
     public Button loginButton;
     public Button registerButton;
@@ -20,9 +20,6 @@ public class LoginManager : MonoBehaviour
 
         loginButton.onClick.AddListener(OnLoginClicked);
         registerButton.onClick.AddListener(OnRegisterClicked);
-
-        // Hide confirm password initially (only needed for registration)
-        //confirmPasswordInput.gameObject.SetActive(false);
 
         SetButtons(false);
         errorText.text = "Connecting...";
@@ -94,6 +91,13 @@ public class LoginManager : MonoBehaviour
 
         if (success)
         {
+            // Load character data after successful login
+            if (CharacterManager.Instance != null)
+            {
+                Debug.Log("🔄 Loading character data after login...");
+                CharacterManager.Instance.LoadFromFirebase();
+            }
+
             SceneLoader.Instance.LoadMainMenu();
         }
         else
@@ -109,10 +113,14 @@ public class LoginManager : MonoBehaviour
 
         if (success)
         {
-            // Defaults should be saved immediately
-            CharacterManager.Instance.playerName = "Player";
-            CharacterManager.Instance.selectedCharacter = 0;
-            CharacterManager.Instance.SaveToFirebase();
+            // Set defaults for new user
+            if (CharacterManager.Instance != null)
+            {
+                CharacterManager.Instance.playerName = "Player";
+                CharacterManager.Instance.selectedCharacter = 0;
+                CharacterManager.Instance.SaveToFirebase();
+                Debug.Log("✅ Saved defaults for new user");
+            }
 
             SceneLoader.Instance.LoadCharacterSelection();
         }
@@ -123,25 +131,6 @@ public class LoginManager : MonoBehaviour
         }
     }
 
-    void OnAuthResult(bool success, string message)
-    {
-        isProcessing = false;
-
-        if (success)
-        {
-            errorText.text = "";
-
-            // LOGIN → MAIN MENU
-            SceneLoader.Instance.LoadMainMenu();
-        }
-        else
-        {
-            errorText.text = message;
-            SetButtons(true);
-        }
-    }
-
-    // Validation for LOGIN (no confirm password needed)
     bool ValidateLogin(string email, string password)
     {
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
@@ -165,7 +154,6 @@ public class LoginManager : MonoBehaviour
         return true;
     }
 
-    // Validation for REGISTRATION (includes confirm password)
     bool ValidateRegistration(string email, string password, string confirmPassword)
     {
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(confirmPassword))

@@ -140,4 +140,5 @@ public class CharacterManager : MonoBehaviour
         Debug.LogWarning("⚠️ Invalid character index, returning first sprite");
         return characterSprites.Length > 0 ? characterSprites[0] : null;
     }
+
 }

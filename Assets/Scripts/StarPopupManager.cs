@@ -180,7 +180,6 @@ public class StarPopupManager : MonoBehaviour
 
     }
 
-
     public void PlayAgain()
     {
         if (AudioManager.Instance != null)

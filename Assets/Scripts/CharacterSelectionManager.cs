@@ -24,6 +24,13 @@ public class CharacterSelectionManager : MonoBehaviour
         character2Button.onClick.AddListener(() => SelectCharacter(1));
         confirmButton.onClick.AddListener(Confirm);
 
+        // NEW - Find and connect return button if it exists
+        Button returnButton = GameObject.Find("ReturnToMenu")?.GetComponent<Button>();
+        if (returnButton != null)
+        {
+            returnButton.onClick.AddListener(ReturnToMenu);
+        }
+
         errorText.text = "";
 
         if (CharacterManager.Instance != null)
@@ -37,6 +44,15 @@ public class CharacterSelectionManager : MonoBehaviour
                 CharacterManager.Instance.OnCharacterDataLoaded += ApplyLoadedData;
             }
         }
+    }
+
+    // NEW METHOD
+    void ReturnToMenu()
+    {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayButtonClick();
+
+        SceneLoader.Instance.LoadMainMenu();
     }
 
     void ApplyLoadedData()
