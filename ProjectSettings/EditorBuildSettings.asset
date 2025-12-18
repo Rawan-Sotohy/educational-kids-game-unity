@@ -26,7 +26,4 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/MathGame.unity
     guid: 8907b334052181b4d98d819af460deb4
-  - enabled: 1
-    path: Assets/Scenes/Settings.unity
-    guid: b27ffffd01a73694c9ecd45d76fca294
   m_configObjects: {}

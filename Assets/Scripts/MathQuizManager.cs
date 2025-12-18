@@ -1,7 +1,8 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class MathQuizManager : MonoBehaviour
 {
@@ -20,19 +21,37 @@ public class MathQuizManager : MonoBehaviour
     private int correctAnswer;
     private List<Question> questions = new List<Question>();
     private Animator characterAnimator;
-
     void Start()
     {
+        // Wait one frame to make sure the selected character is active
+        StartCoroutine(AssignAnimatorNextFrame());
+
         GenerateQuestions();
         DisplayQuestion();
-        //UpdateScoreUI();
-        characterAnimator = FindObjectOfType<Animator>();
+    }
+
+    IEnumerator AssignAnimatorNextFrame()
+    {
+        yield return null; // wait 1 frame
+        characterAnimator = FindActiveCharacterAnimator();
 
         if (characterAnimator == null)
-        {
-            Debug.LogWarning("⚠️ No CharacterAnimator found in scene!");
-        }
+            Debug.LogError("❌ No active character Animator found!");
     }
+
+
+    // Helper method to find the active character's Animator
+    Animator FindActiveCharacterAnimator()
+    {
+        Animator[] allAnimators = FindObjectsOfType<Animator>();
+        foreach (Animator anim in allAnimators)
+        {
+            if (anim.gameObject.activeInHierarchy) // only the enabled character
+                return anim;
+        }
+        return null;
+    }
+
 
     void GenerateQuestions()
     {
@@ -227,21 +246,21 @@ public class MathQuizManager : MonoBehaviour
         Debug.Log($"🎉 Quiz completed! Stars earned: {starsEarned}");
     }
 
-    //public void RestartQuiz()
-    //{
-    //    currentQuestionIndex = 0;
-    //    correctAnswers = 0;
-    //    StarPopupManager.Instance.PlayAgain();
-    //    GenerateQuestions();
-    //    DisplayQuestion();
-    //    //UpdateScoreUI();
-    //}
+    public void RestartQuiz()
+    {
+        currentQuestionIndex = 0;
+        correctAnswers = 0;
+        StarPopupManager.Instance.PlayAgain();
+        GenerateQuestions();
+        DisplayQuestion();
+        //UpdateScoreUI();
+    }
 
     //// Button to go back to main menu
-    //public void BackToMenu()
-    //{
-    //    StarPopupManager.Instance.GoToMainMenu();
-    //}
+    public void BackToMenu()
+    {
+        StarPopupManager.Instance.GoToMainMenu();
+    }
 }
 
 // Helper class to store question data
