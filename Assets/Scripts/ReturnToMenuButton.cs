@@ -1,14 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class ReturnToMenuButton : MonoBehaviour
 {
     public void OnReturnToMenuClicked()
     {
-        if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayButtonClick();
+        if (SettingsManager.Instance != null)
+            SettingsManager.Instance.PlayButtonClick();
 
-        SceneLoader.Instance.LoadMainMenu();
+        SceneManager.LoadScene("MainMenu");
     }
 }

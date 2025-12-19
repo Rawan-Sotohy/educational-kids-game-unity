@@ -2,12 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using PrimeTween;
 
 public class Card : MonoBehaviour
 {
     public Image iconImage;
+
     public Sprite hiddenIconSprite;
     public Sprite iconSprite;
+
     public bool isSelected;
     public CardsController controller;
 
@@ -21,69 +24,29 @@ public class Card : MonoBehaviour
         iconSprite = sp;
     }
 
+
     public void Show()
     {
-        StartCoroutine(ShowAnimation());
-    }
+        Tween.Rotation(transform,
+                   new Vector3(0f, 180f, 0f), // 180 degree in y axis
+                   0.2f);
+        Tween.Delay(0.1f, () => iconImage.sprite = iconSprite);
 
-    private IEnumerator ShowAnimation()
-    {
         isSelected = true;
-        float duration = 0.2f;
-        float elapsed = 0;
-        Quaternion startRot = transform.localRotation;
-        Quaternion endRot = Quaternion.Euler(0f, 180f, 0f);
-
-        bool spriteChanged = false;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-            float t = elapsed / duration;
-            transform.localRotation = Quaternion.Lerp(startRot, endRot, t);
-
-            if (t >= 0.5f && !spriteChanged)
-            {
-                iconImage.sprite = iconSprite;
-                spriteChanged = true;
-            }
-
-            yield return null;
-        }
-
-        transform.localRotation = endRot;
     }
 
     public void Hide()
     {
-        StartCoroutine(HideAnimation());
-    }
+        Tween.Rotation(transform,
+                   new Vector3(0f, 0f, 0f),
+                   0.2f);
 
-    private IEnumerator HideAnimation()
-    {
-        float duration = 0.2f;
-        float elapsed = 0;
-        Quaternion startRot = transform.localRotation;
-        Quaternion endRot = Quaternion.Euler(0f, 0f, 0f);
-
-        bool spriteChanged = false;
-
-        while (elapsed < duration)
+        Tween.Delay(0.1f, () =>
         {
-            elapsed += Time.deltaTime;
-            float t = elapsed / duration;
-            transform.localRotation = Quaternion.Lerp(startRot, endRot, t);
+            iconImage.sprite = hiddenIconSprite;
+            isSelected = false;
+        });
 
-            if (t >= 0.5f && !spriteChanged)
-            {
-                iconImage.sprite = hiddenIconSprite;
-                spriteChanged = true;
-            }
 
-            yield return null;
-        }
-
-        transform.localRotation = endRot;
-        isSelected = false;
     }
 }

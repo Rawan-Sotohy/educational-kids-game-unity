@@ -1,11 +1,26 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class SettingsManager : MonoBehaviour
 {
     public static SettingsManager Instance;
+
+    [Header("Audio Sources")]
+    public AudioSource musicSource;
+    public AudioSource sfxSource;
+
+    [Header("Music")]
+    public AudioClip backgroundMusic;
+
+    [Header("Sound Effects")]
+    public AudioClip buttonClick;
+    public AudioClip correctSound;
+    public AudioClip wrongSound;
+    public AudioClip cardFlip;
+    public AudioClip puzzleSnap;
+    public AudioClip winFanfare;
+    public AudioClip loseSound;
 
     [Header("References (Auto-Found)")]
     private GameObject settingsPopup;
@@ -44,14 +59,34 @@ public class SettingsManager : MonoBehaviour
 
     void Start()
     {
-        // Find popup in current scene
         FindPopupInScene();
 
         if (settingsPopup != null)
         {
             SetupPopup();
         }
+        // Load saved volumes
+        musicSource.volume = PlayerPrefs.GetFloat("MusicVolume", 1f);
+        sfxSource.volume = PlayerPrefs.GetFloat("SFXVolume", 1f);
+
+        // Play music
+        if (backgroundMusic != null)
+        {
+            musicSource.clip = backgroundMusic;
+            musicSource.loop = true;
+            musicSource.Play();
+        }
     }
+
+    public void PlayButtonClick() => sfxSource.PlayOneShot(buttonClick);
+    public void PlayCorrect() => sfxSource.PlayOneShot(correctSound);
+    public void PlayWrong() => sfxSource.PlayOneShot(wrongSound);
+    public void PlayCardFlip() => sfxSource.PlayOneShot(cardFlip);
+    public void PlayPuzzleSnap() => sfxSource.PlayOneShot(puzzleSnap);
+    public void PlayWinFanfare() => sfxSource.PlayOneShot(winFanfare);
+    public void PlayLoseSound() => sfxSource.PlayOneShot(loseSound);
+
+
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         FindPopupInScene();
@@ -73,28 +108,15 @@ public class SettingsManager : MonoBehaviour
     }
     void FindPopupInScene()
     {
-        Debug.Log("🔍 Searching for SettingsPopup...");
-
         Canvas[] canvases = FindObjectsOfType<Canvas>();
-        Debug.Log($"Found {canvases.Length} canvases in scene");
 
         foreach (Canvas canvas in canvases)
         {
-            Debug.Log($"Checking canvas: {canvas.name}");
-
-            // List all children of this canvas
-            for (int i = 0; i < canvas.transform.childCount; i++)
-            {
-                Debug.Log($"  - Child {i}: {canvas.transform.GetChild(i).name}");
-            }
-
             Transform popup = canvas.transform.Find("SettingsPopUp");
             if (popup != null)
             {
                 settingsPopup = popup.gameObject;
-                Debug.Log("✅ Found SettingsPopup in scene!");
 
-                // Find all child elements
                 musicSlider = popup.Find("MusicSlider")?.GetComponent<Slider>();
                 sfxSlider = popup.Find("SFXSlider")?.GetComponent<Slider>();
                 musicMuteButton = popup.Find("MusicMuteButton")?.GetComponent<Button>();
@@ -102,13 +124,6 @@ public class SettingsManager : MonoBehaviour
                 closeButtonTop = popup.Find("CloseButton")?.GetComponent<Button>();
                 closeButtonBottom = popup.Find("CharacterButton")?.GetComponent<Button>();
 
-                // Debug what was found
-                Debug.Log($"MusicSlider: {(musicSlider != null ? "✅" : "❌")}");
-                Debug.Log($"SFXSlider: {(sfxSlider != null ? "✅" : "❌")}");
-                Debug.Log($"CloseButton: {(closeButtonTop != null ? "✅" : "❌")}");
-                Debug.Log($"CharacterButton: {(closeButtonBottom != null ? "✅" : "❌")}");
-
-                // Find icons (Image components inside buttons)
                 if (musicMuteButton != null)
                     musicMuteIcon = musicMuteButton.transform.GetChild(0)?.GetComponent<Image>();
                 if (sfxMuteButton != null)
@@ -117,8 +132,6 @@ public class SettingsManager : MonoBehaviour
                 return;
             }
         }
-
-        Debug.LogError("❌ SettingsPopup not found in scene! Add SettingsPopup prefab to Canvas.");
     }
     void SetupPopup()
     {
@@ -134,10 +147,10 @@ public class SettingsManager : MonoBehaviour
         closeButtonBottom.onClick.RemoveAllListeners();
 
         // Load volumes
-        if (AudioManager.Instance != null)
+        if (SettingsManager.Instance != null)
         {
-            musicSlider.value = AudioManager.Instance.musicSource.volume;
-            sfxSlider.value = AudioManager.Instance.sfxSource.volume;
+            musicSlider.value = SettingsManager.Instance.musicSource.volume;
+            sfxSlider.value = SettingsManager.Instance.sfxSource.volume;
 
             musicPreviousVolume = musicSlider.value > 0 ? musicSlider.value : 1f;
             sfxPreviousVolume = sfxSlider.value > 0 ? sfxSlider.value : 1f;
@@ -156,14 +169,11 @@ public class SettingsManager : MonoBehaviour
         UpdateSFXMuteIcon();
     }
 
-    // ==================== POPUP CONTROL ====================
-
     public void OpenSettings()
     {
         // If popup is null, try finding it again
         if (settingsPopup == null)
         {
-            Debug.Log("⚠️ Popup was null, searching again...");
             FindPopupInScene();
 
             if (settingsPopup != null)
@@ -175,20 +185,19 @@ public class SettingsManager : MonoBehaviour
         if (settingsPopup != null)
         {
             settingsPopup.SetActive(true);
-            PlayClickSound();
+            PlayButtonClick();
         }
         else
         {
             Debug.LogError("❌ SettingsPopup STILL null after re-search!");
         }
     }
-
     public void CloseSettings()
     {
         if (settingsPopup != null)
         {
             settingsPopup.SetActive(false);
-            PlayClickSound();
+            PlayButtonClick();
         }
         else
         {
@@ -203,26 +212,16 @@ public class SettingsManager : MonoBehaviour
             settingsPopup.SetActive(false);
         }
 
-        PlayClickSound();
+        PlayButtonClick();
 
-        if (SceneLoader.Instance != null)
-        {
-            Debug.Log("✅ Loading CharacterSelection scene");
-            SceneLoader.Instance.LoadCharacterSelection();
-        }
-        else
-        {
-            Debug.LogError("❌ SceneLoader.Instance is NULL!");
-        }
+        SceneManager.LoadScene("CharacterSelection");
+
     }
-
-    // ==================== MUSIC ====================
-
     void OnMusicVolumeChanged(float volume)
     {
-        if (AudioManager.Instance == null) return;
+        if (SettingsManager.Instance == null) return;
 
-        AudioManager.Instance.musicSource.volume = volume;
+        SettingsManager.Instance.musicSource.volume = volume;
         PlayerPrefs.SetFloat("MusicVolume", volume);
 
         if (volume == 0f)
@@ -240,25 +239,25 @@ public class SettingsManager : MonoBehaviour
 
     void ToggleMusicMute()
     {
-        if (AudioManager.Instance == null) return;
+        if (SettingsManager.Instance == null) return;
 
         musicIsMuted = !musicIsMuted;
 
         if (musicIsMuted)
         {
-            musicPreviousVolume = AudioManager.Instance.musicSource.volume;
-            AudioManager.Instance.musicSource.volume = 0f;
+            musicPreviousVolume = SettingsManager.Instance.musicSource.volume;
+            SettingsManager.Instance.musicSource.volume = 0f;
         }
         else
         {
-            AudioManager.Instance.musicSource.volume = musicPreviousVolume;
+            SettingsManager.Instance.musicSource.volume = musicPreviousVolume;
         }
 
-        musicSlider.value = AudioManager.Instance.musicSource.volume;
-        PlayerPrefs.SetFloat("MusicVolume", AudioManager.Instance.musicSource.volume);
+        musicSlider.value = SettingsManager.Instance.musicSource.volume;
+        PlayerPrefs.SetFloat("MusicVolume", SettingsManager.Instance.musicSource.volume);
 
         UpdateMusicMuteIcon();
-        PlayClickSound();
+        PlayButtonClick();
     }
 
     void UpdateMusicMuteIcon()
@@ -271,14 +270,11 @@ public class SettingsManager : MonoBehaviour
         musicMuteIcon.color = Color.white; // keep sprite color normal
     }
 
-
-    // ==================== SFX ====================
-
     void OnSFXVolumeChanged(float volume)
     {
-        if (AudioManager.Instance == null) return;
+        if (SettingsManager.Instance == null) return;
 
-        AudioManager.Instance.sfxSource.volume = volume;
+        SettingsManager.Instance.sfxSource.volume = volume;
         PlayerPrefs.SetFloat("SFXVolume", volume);
 
         if (volume == 0f)
@@ -294,32 +290,32 @@ public class SettingsManager : MonoBehaviour
         UpdateSFXMuteIcon();
 
         if (volume > 0)
-            PlayClickSound();
+            PlayButtonClick();
     }
 
     void ToggleSFXMute()
     {
-        if (AudioManager.Instance == null) return;
+        if (SettingsManager.Instance == null) return;
 
         sfxIsMuted = !sfxIsMuted;
 
         if (sfxIsMuted)
         {
-            sfxPreviousVolume = AudioManager.Instance.sfxSource.volume;
-            AudioManager.Instance.sfxSource.volume = 0f;
+            sfxPreviousVolume = SettingsManager.Instance.sfxSource.volume;
+            SettingsManager.Instance.sfxSource.volume = 0f;
         }
         else
         {
-            AudioManager.Instance.sfxSource.volume = sfxPreviousVolume;
+            SettingsManager.Instance.sfxSource.volume = sfxPreviousVolume;
         }
 
-        sfxSlider.value = AudioManager.Instance.sfxSource.volume;
-        PlayerPrefs.SetFloat("SFXVolume", AudioManager.Instance.sfxSource.volume);
+        sfxSlider.value = SettingsManager.Instance.sfxSource.volume;
+        PlayerPrefs.SetFloat("SFXVolume", SettingsManager.Instance.sfxSource.volume);
 
         UpdateSFXMuteIcon();
 
         if (!sfxIsMuted)
-            PlayClickSound();
+            PlayButtonClick();
     }
 
     void UpdateSFXMuteIcon()
@@ -332,12 +328,4 @@ public class SettingsManager : MonoBehaviour
         sfxMuteIcon.color = Color.white;
     }
 
-
-    // ==================== HELPER ====================
-
-    void PlayClickSound()
-    {
-        if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayButtonClick();
-    }
 }

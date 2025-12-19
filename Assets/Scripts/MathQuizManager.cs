@@ -183,14 +183,14 @@ public class MathQuizManager : MonoBehaviour
         {
             correctAnswers++;
             characterAnimator.SetTrigger("Happy");
-            if (AudioManager.Instance != null)
-                AudioManager.Instance.PlayCorrect();
+            if (SettingsManager.Instance != null)
+                SettingsManager.Instance.PlayCorrect();
         }
         else
         {
             characterAnimator.SetTrigger("Sad");
-            if (AudioManager.Instance != null)
-                AudioManager.Instance.PlayWrong();
+            if (SettingsManager.Instance != null)
+                SettingsManager.Instance.PlayWrong();
         }
 
         //UpdateScoreUI();

@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using TMPro;
 
 public class LoginManager : MonoBehaviour
 {
@@ -50,8 +51,8 @@ public class LoginManager : MonoBehaviour
     {
         if (isProcessing) return;
 
-        if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayButtonClick();
+        if (SettingsManager.Instance != null)
+            SettingsManager.Instance.PlayButtonClick();
 
         string email = emailInput.text.Trim();
         string password = passwordInput.text;
@@ -69,8 +70,8 @@ public class LoginManager : MonoBehaviour
     {
         if (isProcessing) return;
 
-        if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayButtonClick();
+        if (SettingsManager.Instance != null)
+            SettingsManager.Instance.PlayButtonClick();
 
         string email = emailInput.text.Trim();
         string password = passwordInput.text;
@@ -98,7 +99,7 @@ public class LoginManager : MonoBehaviour
                 CharacterManager.Instance.LoadFromFirebase();
             }
 
-            SceneLoader.Instance.LoadMainMenu();
+            SceneManager.LoadScene("MainMenu");
         }
         else
         {
@@ -122,7 +123,7 @@ public class LoginManager : MonoBehaviour
                 Debug.Log("✅ Saved defaults for new user");
             }
 
-            SceneLoader.Instance.LoadCharacterSelection();
+            SceneManager.LoadScene("CharacterSelection");
         }
         else
         {

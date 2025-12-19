@@ -4,10 +4,6 @@ using Firebase.Auth;
 using System;
 using System.Collections.Generic;
 
-/// <summary>
-/// Manages Firebase initialization and authentication
-/// Singleton + main-thread safe
-/// </summary>
 public class FirebaseManager : MonoBehaviour
 {
     public static FirebaseManager Instance;
@@ -91,8 +87,6 @@ public class FirebaseManager : MonoBehaviour
             });
         });
     }
-
-    // ================= AUTH =================
 
     public void LoginUser(string email, string password, Action<bool, string> callback)
     {
@@ -198,9 +192,7 @@ public class FirebaseManager : MonoBehaviour
                         return "Invalid email address!";
 
                     case AuthError.Failure:
-                        // Covers:
-                        // - wrong password
-                        // - user not found
+                        // wrong password, user not found
                         return "Invalid email or password.";
 
                     case AuthError.EmailAlreadyInUse:

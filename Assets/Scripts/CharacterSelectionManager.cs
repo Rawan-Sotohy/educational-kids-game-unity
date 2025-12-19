@@ -1,11 +1,8 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using TMPro;
 
-/// <summary>
-/// SIMPLE character selection - just pick name and 1 of 3 characters
-/// Add to CharacterSelection scene
-/// </summary>
 public class CharacterSelectionManager : MonoBehaviour
 {
     [Header("UI")]
@@ -13,7 +10,6 @@ public class CharacterSelectionManager : MonoBehaviour
     public Button character1Button;
     public Button character2Button;
     public Button confirmButton;
-    public Image previewImage; // Shows selected character
     public TMP_Text errorText;
 
     private int selectedChar = 0;
@@ -23,13 +19,6 @@ public class CharacterSelectionManager : MonoBehaviour
         character1Button.onClick.AddListener(() => SelectCharacter(0));
         character2Button.onClick.AddListener(() => SelectCharacter(1));
         confirmButton.onClick.AddListener(Confirm);
-
-        // NEW - Find and connect return button if it exists
-        //Button returnButton = GameObject.Find("ReturnToMenu")?.GetComponent<Button>();
-        //if (returnButton != null)
-        //{
-        //    returnButton.onClick.AddListener(ReturnToMenu);
-        //}
 
         errorText.text = "";
 
@@ -45,15 +34,6 @@ public class CharacterSelectionManager : MonoBehaviour
             }
         }
     }
-
-    // NEW METHOD
-    //void ReturnToMenu()
-    //{
-    //    if (AudioManager.Instance != null)
-    //        AudioManager.Instance.PlayButtonClick();
-
-    //    SceneLoader.Instance.LoadMainMenu();
-    //}
 
     void ApplyLoadedData()
     {
@@ -74,14 +54,10 @@ public class CharacterSelectionManager : MonoBehaviour
     {
         if (CharacterManager.Instance != null)
         {
-            // Set name input to current name
             nameInput.text = CharacterManager.Instance.playerName;
 
-            // Select current character
             selectedChar = CharacterManager.Instance.selectedCharacter;
             SelectCharacter(selectedChar);
-
-            Debug.Log($"📝 Loaded current: {CharacterManager.Instance.playerName}, Character {selectedChar}");
         }
         else
         {
@@ -99,18 +75,14 @@ public class CharacterSelectionManager : MonoBehaviour
 
         selectedChar = index;
 
-        if (previewImage != null)
-            previewImage.sprite = CharacterManager.Instance.characterSprites[index];
-
         ResetButtonColors();
 
         Button selectedButton = index == 0 ? character1Button : character2Button;
         selectedButton.GetComponent<Image>().color = Color.yellow;
 
-        if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayButtonClick();
+        if (SettingsManager.Instance != null)
+            SettingsManager.Instance.PlayButtonClick();
     }
-
 
     void ResetButtonColors()
     {
@@ -129,17 +101,13 @@ public class CharacterSelectionManager : MonoBehaviour
         }
 
         // Save to CharacterManager
-        if (CharacterManager.Instance != null)
-        {
-            CharacterManager.Instance.playerName = name;
-            CharacterManager.Instance.selectedCharacter = selectedChar;
-            CharacterManager.Instance.SaveToFirebase();
-        }
-
-        if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayButtonClick();
+        CharacterManager.Instance.playerName = name;
+        CharacterManager.Instance.selectedCharacter = selectedChar;
+        CharacterManager.Instance.SaveToFirebase();
+        
+        SettingsManager.Instance.PlayButtonClick();
 
         // Go to main menu
-        SceneLoader.Instance.LoadMainMenu();
+        SceneManager.LoadScene("MainMenu");
     }
 }

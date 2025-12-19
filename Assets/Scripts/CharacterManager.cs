@@ -1,16 +1,12 @@
 ﻿using UnityEngine;
 using Firebase.Database;
 
-/// <summary>
-/// SIMPLE character system - stores name and character choice
-/// Add to Loading scene
-/// </summary>
 public class CharacterManager : MonoBehaviour
 {
     public static CharacterManager Instance;
 
     [Header("Character Images")]
-    public Sprite[] characterSprites; // Drag your 2 character images here
+    public Sprite[] characterSprites; 
 
     [Header("Current Selection")]
     public string playerName = "Player";
@@ -38,16 +34,11 @@ public class CharacterManager : MonoBehaviour
 
     void Start()
     {
-        // Initialize database with URL
         databaseRef = FirebaseDatabase.GetInstance(databaseURL).RootReference;
 
-        // Try to load saved data
         LoadFromFirebase();
     }
 
-    /// <summary>
-    /// Load name and character from Firebase
-    /// </summary>
     public void LoadFromFirebase()
     {
         IsDataLoaded = false;
@@ -95,9 +86,6 @@ public class CharacterManager : MonoBehaviour
             });
     }
 
-    /// <summary>
-    /// Save name and character to Firebase
-    /// </summary>
     public void SaveToFirebase()
     {
         if (FirebaseManager.Instance == null || !FirebaseManager.Instance.IsUserLoggedIn())
@@ -129,9 +117,6 @@ public class CharacterManager : MonoBehaviour
             });
     }
 
-    /// <summary>
-    /// Get current character sprite
-    /// </summary>
     public Sprite GetCurrentCharacterSprite()
     {
         if (selectedCharacter >= 0 && selectedCharacter < characterSprites.Length)

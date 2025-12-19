@@ -114,7 +114,6 @@ public class StarPopupManager : MonoBehaviour
         mainMenuButton.onClick.AddListener(GoToMainMenu);
     }
 
-    // ==================== PUBLIC METHODS ====================
     public string GetTitleText(int starCount)
     {
         switch (starCount)
@@ -160,45 +159,42 @@ public class StarPopupManager : MonoBehaviour
                 stars[i].sprite = i < starCount ? starFull : starEmpty;
         }
 
-        // ⭐ SET TITLE TEXT HERE
         if (winText != null)
             winText.text = GetTitleText(starCount);
 
-        // Score / message text
         if (scoreText != null)
             scoreText.text = message;
 
         popupPanel.SetActive(true);
 
-        if (AudioManager.Instance != null)
+        if (SettingsManager.Instance != null)
         {
             if (starCount <= 1)
-                AudioManager.Instance.PlayLoseSound();
+                SettingsManager.Instance.PlayLoseSound();
             else
-                AudioManager.Instance.PlayWinFanfare();
+                SettingsManager.Instance.PlayWinFanfare();
         }
 
     }
 
     public void PlayAgain()
     {
-        if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayButtonClick();
+        SettingsManager.Instance.PlayButtonClick();
 
         if (popupPanel != null)
             popupPanel.SetActive(false);
 
-        SceneLoader.Instance.ReloadCurrentScene();
+        Scene currentScene = SceneManager.GetActiveScene();
+        SceneManager.LoadScene(currentScene.name);
     }
 
     public void GoToMainMenu()
     {
-        if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayButtonClick();
+        SettingsManager.Instance.PlayButtonClick();
          
         if (popupPanel != null)
             popupPanel.SetActive(false);
 
-        SceneLoader.Instance.LoadMainMenu();
+        SceneManager.LoadScene("MainMenu");
     }
 }

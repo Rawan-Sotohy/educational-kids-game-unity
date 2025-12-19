@@ -63,8 +63,8 @@ public class PuzzleGameManager : MonoBehaviour
             image.GetComponent<Button>().onClick.AddListener(delegate
             {
                 // 🔊 Play click sound when selecting image
-                if (AudioManager.Instance != null)
-                    AudioManager.Instance.PlayButtonClick();
+                if (SettingsManager.Instance != null)
+                    SettingsManager.Instance.PlayButtonClick();
 
                 StartGame(texture);
             });
@@ -113,8 +113,8 @@ public class PuzzleGameManager : MonoBehaviour
                 offset += Vector3.back;
 
                 // 🔊 Play snap sound when picking up piece
-                if (AudioManager.Instance != null)
-                    AudioManager.Instance.PlayPuzzleSnap();
+                if (SettingsManager.Instance != null)
+                    SettingsManager.Instance.PlayPuzzleSnap();
             }
         }
 
@@ -278,8 +278,8 @@ public class PuzzleGameManager : MonoBehaviour
             draggingPiece.GetComponent<BoxCollider2D>().enabled = false;
 
             // 🔊 Play correct sound when piece snaps into place
-            if (AudioManager.Instance != null)
-                AudioManager.Instance.PlayCorrect();
+            if (SettingsManager.Instance != null)
+                SettingsManager.Instance.PlayCorrect();
 
             // 😊 Trigger happy animation
             if (characterAnimator != null)

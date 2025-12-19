@@ -1,6 +1,7 @@
-using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class MainMenuManager : MonoBehaviour
 {
@@ -8,52 +9,24 @@ public class MainMenuManager : MonoBehaviour
     public Button memoryMatchButton;
     public Button puzzleGameButton;
     public Button mathGameButton;
-    public Image characterAvatar;
 
     void Start()
     {
         // Add button listeners with sound
         memoryMatchButton.onClick.AddListener(() => {
-            PlayClick();
-            SceneLoader.Instance.LoadMemoryMatch();
+            SettingsManager.Instance.PlayButtonClick();
+            SceneManager.LoadScene("MemoryMatch");
         });
 
         puzzleGameButton.onClick.AddListener(() => {
-            PlayClick();
-            SceneLoader.Instance.LoadPuzzleGame();
+            SettingsManager.Instance.PlayButtonClick();
+            SceneManager.LoadScene("PuzzleGame");
         });
 
         mathGameButton.onClick.AddListener(() => {
-            PlayClick();
-            SceneLoader.Instance.LoadMathGame();
+            SettingsManager.Instance.PlayButtonClick();
+            SceneManager.LoadScene("MathGame");
         });
 
-
-        // TODO: Load character avatar from Firebase when character selection is done
-    }
-
-    void PlayClick()
-    {
-        if (AudioManager.Instance != null)
-            AudioManager.Instance.PlayButtonClick();
-    }
-
-    void OpenSettings()
-    {
-        PlayClick();
-        if (SettingsManager.Instance != null)
-            SettingsManager.Instance.OpenSettings();
-    }
-
-    void Logout()
-    {
-        PlayClick();
-
-        if (FirebaseManager.Instance != null)
-        {
-            FirebaseManager.Instance.LogoutUser();
-        }
-
-        SceneLoader.Instance.LoadLogin();
-    }
+    }    
 }
