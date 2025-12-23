@@ -59,4 +59,14 @@ Welcome to **EduFun Adventure**, a fun and educational mini-game collection! Enj
 
 ---
 
+## Contributors
+
+- [Jannah Ayman](https://github.com/jannah-ayman) 
+- [Rawan Sotohy](https://github.com/Rawan-Sotohy)  
+- [Nancy Saad](https://github.com/nancyabdelbaryy)
+
+If you'd like to contribute, feel free to open a pull request or contact us!
+
+---
+
 Have fun learning and playing with **EduFun Adventure**! 🎉🐾
