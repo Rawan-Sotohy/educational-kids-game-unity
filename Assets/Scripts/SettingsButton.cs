@@ -6,18 +6,7 @@ public class SettingsButton : MonoBehaviour
     void Start()
     {
         Button button = GetComponent<Button>();
-        button.onClick.AddListener(OpenSettings);
+        button.onClick.AddListener(SettingsManager.Instance.OpenSettings);
     }
 
-    void OpenSettings()
-    {
-        if (SettingsManager.Instance != null)
-        {
-            SettingsManager.Instance.OpenSettings();
-        }
-        else
-        {
-            Debug.LogError("SettingsManager not found! Make sure you started from Loading scene.");
-        }
-    }
 }

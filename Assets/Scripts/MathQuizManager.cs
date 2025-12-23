@@ -193,9 +193,6 @@ public class MathQuizManager : MonoBehaviour
                 SettingsManager.Instance.PlayWrong();
         }
 
-        //UpdateScoreUI();
-
-        // Move to next question after short delay
         Invoke(nameof(NextQuestion), 0.5f);
     }
 
@@ -204,11 +201,6 @@ public class MathQuizManager : MonoBehaviour
         currentQuestionIndex++;
         DisplayQuestion();
     }
-
-    //void UpdateScoreUI()
-    //{
-    //    scoreText.text = $"Score: {correctAnswers}/{totalQuestions}";
-    //}
 
     void ShowResults()
     {
@@ -233,17 +225,8 @@ public class MathQuizManager : MonoBehaviour
         // Create message for popup
         string message = $"You got {correctAnswers} out of {totalQuestions} correct!";
 
-        // Show star popup
-        if (StarPopupManager.Instance != null)
-        {
-            StarPopupManager.Instance.ShowStars(starsEarned, message);
-        }
-        else
-        {
-            Debug.LogError("❌ StarPopupManager not found!");
-        }
-
-        Debug.Log($"🎉 Quiz completed! Stars earned: {starsEarned}");
+        StarPopupManager.Instance.ShowStars(starsEarned, message);
+        
     }
 
     public void RestartQuiz()
@@ -253,10 +236,8 @@ public class MathQuizManager : MonoBehaviour
         StarPopupManager.Instance.PlayAgain();
         GenerateQuestions();
         DisplayQuestion();
-        //UpdateScoreUI();
     }
 
-    //// Button to go back to main menu
     public void BackToMenu()
     {
         StarPopupManager.Instance.GoToMainMenu();

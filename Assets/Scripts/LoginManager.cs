@@ -68,23 +68,31 @@ public class LoginManager : MonoBehaviour
 
         if (!success) return;
 
-        // ✅ Wait for character data from Firebase before loading MainMenu
-        if (CharacterManager.Instance != null)
-        {
-            errorText.text = "Loading character data...";
-            CharacterManager.Instance.LoadFromFirebase(() =>
-            {
-                // After character data is loaded, go to MainMenu
-                SceneManager.LoadScene("MainMenu");
-            });
-        }
-        else
-        {
-            // Fallback: just load MainMenu
-            SceneManager.LoadScene("MainMenu");
-        }
+        LoadCharacterDataAndProceed("MainMenu");
     }
+    private void LoadCharacterDataAndProceed(string sceneName)
+    {
+        if (CharacterManager.Instance == null)
+        {
+            SceneManager.LoadScene(sceneName);
+            return;
+        }
 
+        errorText.text = "Loading character data...";
+
+        // Temporary listener
+        System.Action onDataLoaded = null;
+        onDataLoaded = () =>
+        {
+            // This runs when data finishes loading
+            CharacterManager.Instance.OnCharacterDataLoaded -= onDataLoaded; // unsubscribe to avoid leaks
+            SceneManager.LoadScene(sceneName);
+        };
+
+        // Subscribe and trigger load
+        CharacterManager.Instance.OnCharacterDataLoaded += onDataLoaded;
+        CharacterManager.Instance.LoadFromFirebase(); // this will eventually invoke the event
+    }
     // --------------------- REGISTER ---------------------
     public void OnRegisterClicked()
     {
@@ -111,18 +119,7 @@ public class LoginManager : MonoBehaviour
 
         if (!success) return;
 
-        // After registration, load CharacterSelection
-        if (CharacterManager.Instance != null)
-        {
-            CharacterManager.Instance.LoadFromFirebase(() =>
-            {
-                SceneManager.LoadScene("CharacterSelection");
-            });
-        }
-        else
-        {
-            SceneManager.LoadScene("CharacterSelection");
-        }
+        LoadCharacterDataAndProceed("CharacterSelection");
     }
 
     // --------------------- VALIDATION ---------------------

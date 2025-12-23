@@ -5,14 +5,9 @@ public class CharacterManager : MonoBehaviour
 {
     public static CharacterManager Instance;
 
-    [Header("Character Images")]
-    public Sprite[] characterSprites;
-
-    [Header("Current Selection")]
     public string playerName = "Player";
     public int selectedCharacter = 0;
 
-    [Header("Firebase Settings")]
     public string databaseURL = "https://educational-kids-game-un-4ef4d-default-rtdb.firebaseio.com";
 
     private DatabaseReference databaseRef;
@@ -34,7 +29,6 @@ public class CharacterManager : MonoBehaviour
 
     void Start()
     {
-        // Wait for FirebaseManager to be ready
         if (FirebaseManager.Instance != null && FirebaseManager.Instance.isFirebaseReady)
         {
             InitDatabaseAndLoad();
@@ -47,15 +41,10 @@ public class CharacterManager : MonoBehaviour
 
     void InitDatabaseAndLoad()
     {
-        // Firebase is ready
         databaseRef = FirebaseDatabase.GetInstance(databaseURL).RootReference;
         LoadFromFirebase();
     }
-    void OnEnable()
-    { // Always try to load data when this scene is active
-        if (!IsDataLoaded)
-            LoadFromFirebase();
-    }
+
     public void LoadFromFirebase()
     {
         IsDataLoaded = false;
@@ -86,7 +75,7 @@ public class CharacterManager : MonoBehaviour
                         string charStr = snapshot.Child("character").Value?.ToString() ?? "0";
                         int.TryParse(charStr, out selectedCharacter);
 
-                        if (selectedCharacter < 0 || selectedCharacter >= characterSprites.Length)
+                        if (selectedCharacter < 0 || selectedCharacter >= 2)
                             selectedCharacter = 0;
 
                         Debug.Log($"✅ Loaded from DB: {playerName}, Character {selectedCharacter}");
@@ -101,7 +90,11 @@ public class CharacterManager : MonoBehaviour
                 });
             });
     }
-
+    //public void LoadFromFirebase(System.Action onLoaded)
+    //{
+    //    OnCharacterDataLoaded += onLoaded;
+    //    LoadFromFirebase();
+    //}
     public void SaveToFirebase()
     {
         if (FirebaseManager.Instance == null || !FirebaseManager.Instance.IsUserLoggedIn())
@@ -137,20 +130,8 @@ public class CharacterManager : MonoBehaviour
         playerName = "Player";
         selectedCharacter = 0;
         IsDataLoaded = false;
-        OnCharacterDataLoaded = null; // <--- clear previous subscribers
+        OnCharacterDataLoaded = null; 
     }
 
-    public void LoadFromFirebase(System.Action onLoaded)
-    {
-        OnCharacterDataLoaded += onLoaded;
-        LoadFromFirebase();
-    }
-
-    public Sprite GetCurrentCharacterSprite()
-    {
-        if (selectedCharacter >= 0 && selectedCharacter < characterSprites.Length)
-            return characterSprites[selectedCharacter];
-
-        return characterSprites.Length > 0 ? characterSprites[0] : null;
-    }
+    
 }

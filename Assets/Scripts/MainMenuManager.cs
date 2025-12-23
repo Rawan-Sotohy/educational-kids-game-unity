@@ -1,4 +1,3 @@
-using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -12,7 +11,6 @@ public class MainMenuManager : MonoBehaviour
 
     void Start()
     {
-        // Add button listeners with sound
         memoryMatchButton.onClick.AddListener(() => {
             SettingsManager.Instance.PlayButtonClick();
             SceneManager.LoadScene("MemoryMatch");
