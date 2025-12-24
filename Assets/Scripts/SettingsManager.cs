@@ -201,7 +201,8 @@ public class SettingsManager : MonoBehaviour
 
     void UpdateMusicMuteIcon()
     {
-        musicMuteIcon.sprite = musicIsMuted ? musicMutedSprite : musicUnmutedSprite;
+        bool muted = musicSource.volume == 0f;
+        musicMuteIcon.sprite = muted ? musicMutedSprite : musicUnmutedSprite;
     }
 
     void OnSFXVolumeChanged(float volume)
@@ -250,7 +251,8 @@ public class SettingsManager : MonoBehaviour
 
     void UpdateSFXMuteIcon()
     {
-        sfxMuteIcon.sprite = sfxIsMuted ? sfxMutedSprite : sfxUnmutedSprite;
+        bool muted = sfxSource.volume == 0f;
+        sfxMuteIcon.sprite = muted ? sfxMutedSprite : sfxUnmutedSprite;
     }
 
 }
