@@ -42,8 +42,21 @@ public class PuzzleGameManager : MonoBehaviour
 
     void Start()
     {
-        // Find character animator
-        StartCoroutine(AssignAnimatorNextFrame());
+        GameObject characterSwitcher = GameObject.Find("SceneCharacterSwitcher");
+
+        if (characterSwitcher == null)
+            characterAnimator = null;
+        else
+        {
+            foreach (Transform child in characterSwitcher.transform)
+            {
+                if (child.gameObject.activeInHierarchy)
+                    characterAnimator = child.GetComponent<Animator>();
+            }
+        }
+
+        if (characterAnimator == null)
+            Debug.LogError("❌ No active character Animator found!");
 
         // Hide timer, reference image, and game holder initially
         if (timerText != null) timerText.gameObject.SetActive(false);
@@ -70,27 +83,6 @@ public class PuzzleGameManager : MonoBehaviour
             });
         }
     }
-
-    IEnumerator AssignAnimatorNextFrame()
-    {
-        yield return null; // wait 1 frame
-        characterAnimator = FindActiveCharacterAnimator();
-
-        if (characterAnimator == null)
-            Debug.LogWarning("⚠️ No active character Animator found!");
-    }
-
-    Animator FindActiveCharacterAnimator()
-    {
-        Animator[] allAnimators = FindObjectsOfType<Animator>();
-        foreach (Animator anim in allAnimators)
-        {
-            if (anim.gameObject.activeInHierarchy)
-                return anim;
-        }
-        return null;
-    }
-
     void Update()
     {
         // Update timer if puzzle is active

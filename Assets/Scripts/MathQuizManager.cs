@@ -8,8 +8,7 @@ public class MathQuizManager : MonoBehaviour
 {
     [Header("UI References")]
     public TMP_Text questionText;
-    public Button[] answerButtons; // 4 buttons
-    //public TMP_Text scoreText;
+    public Button[] answerButtons;
     public TMP_Text questionNumberText;
 
     [Header("Game Settings")]
@@ -23,35 +22,31 @@ public class MathQuizManager : MonoBehaviour
     private Animator characterAnimator;
     void Start()
     {
-        // Wait one frame to make sure the selected character is active
-        StartCoroutine(AssignAnimatorNextFrame());
+        GameObject characterSwitcher = GameObject.Find("SceneCharacterSwitcher");
+
+        if (characterSwitcher == null) 
+            characterAnimator = null;
+        else
+        {
+            foreach (Transform child in characterSwitcher.transform)
+            {
+                if (child.gameObject.activeInHierarchy)
+                    characterAnimator = child.GetComponent<Animator>();
+            }
+        }
+
+        if (characterAnimator == null)
+            Debug.LogError("❌ No active character Animator found!");
 
         GenerateQuestions();
         DisplayQuestion();
     }
 
-    IEnumerator AssignAnimatorNextFrame()
+    private class Question
     {
-        yield return null; // wait 1 frame
-        characterAnimator = FindActiveCharacterAnimator();
-
-        if (characterAnimator == null)
-            Debug.LogError("❌ No active character Animator found!");
+        public string questionText;
+        public int correctAnswer;
     }
-
-
-    // Helper method to find the active character's Animator
-    Animator FindActiveCharacterAnimator()
-    {
-        Animator[] allAnimators = FindObjectsOfType<Animator>();
-        foreach (Animator anim in allAnimators)
-        {
-            if (anim.gameObject.activeInHierarchy) // only the enabled character
-                return anim;
-        }
-        return null;
-    }
-
 
     void GenerateQuestions()
     {
@@ -62,7 +57,6 @@ public class MathQuizManager : MonoBehaviour
             int num1 = Random.Range(1, maxNumber + 1);
             int num2 = Random.Range(1, maxNumber + 1);
 
-            // Randomly choose operation: 0=add, 1=subtract, 2=multiply
             int operation = Random.Range(0, 3);
 
             Question q = new Question();
@@ -95,8 +89,6 @@ public class MathQuizManager : MonoBehaviour
 
             questions.Add(q);
         }
-
-        Debug.Log($"✅ Generated {totalQuestions} questions");
     }
 
     void DisplayQuestion()
@@ -111,26 +103,20 @@ public class MathQuizManager : MonoBehaviour
         questionText.text = q.questionText;
         correctAnswer = q.correctAnswer;
 
-        // Update UI counters
         questionNumberText.text = $"Question {currentQuestionIndex + 1}/{totalQuestions}";
 
-        // Generate 4 answer options (1 correct + 3 wrong)
         List<int> options = GenerateAnswerOptions(correctAnswer);
 
-        // Assign options to buttons
         for (int i = 0; i < answerButtons.Length; i++)
         {
             int answer = options[i];
             answerButtons[i].GetComponentInChildren<TMP_Text>().text = answer.ToString();
 
-            // Remove old listeners to avoid duplicates
             answerButtons[i].onClick.RemoveAllListeners();
 
-            // Capture the answer value in local variable
             int capturedAnswer = answer;
             answerButtons[i].onClick.AddListener(() => OnAnswerSelected(capturedAnswer));
 
-            // Enable button
             answerButtons[i].interactable = true;
         }
     }
@@ -139,7 +125,6 @@ public class MathQuizManager : MonoBehaviour
     {
         List<int> options = new List<int> { correct };
 
-        // Generate 3 wrong answers
         while (options.Count < 4)
         {
             // Create wrong answer near the correct one
@@ -148,14 +133,13 @@ public class MathQuizManager : MonoBehaviour
 
             int wrongAnswer = correct + offset;
 
-            // Make sure it's positive and not duplicate
+            // make sure it's positive and not duplicate
             if (wrongAnswer > 0 && !options.Contains(wrongAnswer))
             {
                 options.Add(wrongAnswer);
             }
         }
 
-        // Shuffle the options so correct answer isn't always first
         ShuffleList(options);
 
         return options;
@@ -174,11 +158,9 @@ public class MathQuizManager : MonoBehaviour
 
     void OnAnswerSelected(int selectedAnswer)
     {
-        // Disable all buttons to prevent multiple clicks
         foreach (Button btn in answerButtons)
             btn.interactable = false;
 
-        // Check if answer is correct
         if (selectedAnswer == correctAnswer)
         {
             correctAnswers++;
@@ -204,16 +186,7 @@ public class MathQuizManager : MonoBehaviour
 
     void ShowResults()
     {
-        // Calculate percentage
         float percentage = (float)correctAnswers / totalQuestions * 100f;
-
-        // Calculate stars (0-5 scale)
-        // 5 stars: 90-100%
-        // 4 stars: 80-89%
-        // 3 stars: 60-79%
-        // 2 stars: 40-59%
-        // 1 star: 20-39%
-        // 0 stars: below 20%
 
         int starsEarned = 0;
         if (percentage >= 90) starsEarned = 5;
@@ -222,11 +195,9 @@ public class MathQuizManager : MonoBehaviour
         else if (percentage >= 40) starsEarned = 2;
         else if (percentage >= 20) starsEarned = 1;
 
-        // Create message for popup
         string message = $"You got {correctAnswers} out of {totalQuestions} correct!";
 
         StarPopupManager.Instance.ShowStars(starsEarned, message);
-        
     }
 
     public void RestartQuiz()
@@ -242,12 +213,4 @@ public class MathQuizManager : MonoBehaviour
     {
         StarPopupManager.Instance.GoToMainMenu();
     }
-}
-
-// Helper class to store question data
-[System.Serializable]
-public class Question
-{
-    public string questionText;
-    public int correctAnswer;
 }

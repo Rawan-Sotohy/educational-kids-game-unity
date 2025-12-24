@@ -22,29 +22,24 @@ public class CardsController : MonoBehaviour
 
     void Start()
     {
-        StartCoroutine(AssignAnimatorNextFrame());
-        PrepareSprites();
-        CreateCards();
-    }
+        GameObject characterSwitcher = GameObject.Find("SceneCharacterSwitcher");
 
-    IEnumerator AssignAnimatorNextFrame()
-    {
-        yield return null;
-        characterAnimator = FindActiveCharacterAnimator();
+        if (characterSwitcher == null)
+            characterAnimator = null;
+        else
+        {
+            foreach (Transform child in characterSwitcher.transform)
+            {
+                if (child.gameObject.activeInHierarchy)
+                    characterAnimator = child.GetComponent<Animator>();
+            }
+        }
 
         if (characterAnimator == null)
             Debug.LogError("❌ No active character Animator found!");
-    }
 
-    Animator FindActiveCharacterAnimator()
-    {
-        Animator[] allAnimators = FindObjectsOfType<Animator>();
-        foreach (Animator anim in allAnimators)
-        {
-            if (anim.gameObject.activeInHierarchy)
-                return anim;
-        }
-        return null;
+        PrepareSprites();
+        CreateCards();
     }
 
     void PrepareSprites()
