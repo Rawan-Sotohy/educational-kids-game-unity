@@ -1,17 +1,15 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+﻿using TMPro;
+using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class StarPopupManager : MonoBehaviour
 {
     public static StarPopupManager Instance;
 
-    [Header("Sprites (Assign in Inspector)")]
     public Sprite starEmpty;
     public Sprite starFull;
 
-    // Auto-found references
     private GameObject popupPanel;
     private TMP_Text winText;
     private Image[] stars;
@@ -38,27 +36,7 @@ public class StarPopupManager : MonoBehaviour
 
         if (popupPanel != null)
         {
-            SetupPopup();
-        }
-    }
-
-    void OnEnable()
-    {
-        SceneManager.sceneLoaded += OnSceneLoaded;
-    }
-
-    void OnDisable()
-    {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
-    }
-
-    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        FindPopupInScene();
-
-        if (popupPanel != null)
-        {
-            SetupPopup();
+            popupPanel.SetActive(false);
         }
     }
 
@@ -72,66 +50,22 @@ public class StarPopupManager : MonoBehaviour
             if (popup != null)
             {
                 popupPanel = popup.gameObject;
-                Debug.Log("✅ Found StarPopup in scene!");
+                Debug.Log("Found StarPopup in scene!");
 
-                // Find all child elements
                 winText = popup.Find("WinText")?.GetComponent<TMP_Text>();
                 scoreText = popup.Find("ScoreText")?.GetComponent<TMP_Text>();
                 playAgainButton = popup.Find("PlayAgainButton")?.GetComponent<Button>();
                 mainMenuButton = popup.Find("MainMenuButton")?.GetComponent<Button>();
-
-                // Find stars container and all star images
                 Transform starsContainer = popup.Find("StarsContainer");
-                if (starsContainer != null)
-                {
-                    stars = new Image[5];
-                    for (int i = 0; i < 5; i++)
-                    {
-                        Transform star = starsContainer.Find("Star" + (i + 1));
-                        if (star != null)
-                            stars[i] = star.GetComponent<Image>();
-                    }
-                }
 
+                stars = new Image[5];
+                for (int i = 0; i < 5; i++)
+                {
+                    Transform star = starsContainer.Find("Star" + (i + 1));
+                    stars[i] = star.GetComponent<Image>();
+                }
                 return;
             }
-        }
-
-        Debug.LogWarning("⚠️ StarPopup not found in scene!");
-    }
-
-    void SetupPopup()
-    {
-        // Hide popup
-        popupPanel.SetActive(false);
-
-        // Remove old listeners
-        playAgainButton.onClick.RemoveAllListeners();
-        mainMenuButton.onClick.RemoveAllListeners();
-
-        // Add listeners
-        playAgainButton.onClick.AddListener(PlayAgain);
-        mainMenuButton.onClick.AddListener(GoToMainMenu);
-    }
-
-    public string GetTitleText(int starCount)
-    {
-        switch (starCount)
-        {
-            case 5:
-                return "Amazing!";
-            case 4:
-                return "Great Job!";
-            case 3:
-                return "Nice Work!";
-            case 2:
-                return "Keep Practicing!";
-            case 1:
-                return "Almost There!";
-            case 0:
-                return "Uh-Oh!";
-            default:
-                return "";
         }
     }
 
@@ -141,40 +75,50 @@ public class StarPopupManager : MonoBehaviour
         {
             FindPopupInScene();
             if (popupPanel != null)
-                SetupPopup();
-        }
-
-        if (popupPanel == null)
-        {
-            Debug.LogError("❌ StarPopup not found in scene!");
-            return;
+                popupPanel.SetActive(false);
         }
 
         starCount = Mathf.Clamp(starCount, 0, 5);
 
-        // ⭐ Set star images
         for (int i = 0; i < stars.Length; i++)
         {
             if (stars[i] != null)
                 stars[i].sprite = i < starCount ? starFull : starEmpty;
         }
 
-        if (winText != null)
-            winText.text = GetTitleText(starCount);
+        switch (starCount)
+        {
+            case 5:
+                winText.text = "Amazing!";
+                break;
+            case 4:
+                winText.text = "Great Job!";
+                break;
+            case 3:
+                winText.text = "Nice Work!";
+                break;
+            case 2:
+                winText.text = "Keep Practicing!";
+                break;
+            case 1:
+                winText.text = "Almost There!";
+                break;
+            case 0:
+                winText.text = "Uh-Oh!";
+                break;
+            default:
+                winText.text = "";
+                break;
+        }
 
-        if (scoreText != null)
-            scoreText.text = message;
+        scoreText.text = message;
 
         popupPanel.SetActive(true);
 
-        if (SettingsManager.Instance != null)
-        {
-            if (starCount <= 1)
-                SettingsManager.Instance.PlayLoseSound();
-            else
-                SettingsManager.Instance.PlayWinFanfare();
-        }
-
+        if (starCount <= 1)
+            SettingsManager.Instance.PlayLoseSound();
+        else
+            SettingsManager.Instance.PlayWinFanfare();
     }
 
     public void PlayAgain()
@@ -184,14 +128,13 @@ public class StarPopupManager : MonoBehaviour
         if (popupPanel != null)
             popupPanel.SetActive(false);
 
-        Scene currentScene = SceneManager.GetActiveScene();
-        SceneManager.LoadScene(currentScene.name);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     public void GoToMainMenu()
     {
         SettingsManager.Instance.PlayButtonClick();
-         
+
         if (popupPanel != null)
             popupPanel.SetActive(false);
 

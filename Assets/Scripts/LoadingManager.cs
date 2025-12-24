@@ -33,7 +33,7 @@ public class LoadingManager : MonoBehaviour
 
         if (FirebaseManager.Instance.IsUserLoggedIn())
         {
-            Debug.Log("✅ Auto-login success");
+            Debug.Log("Auto-login success");
 
             CharacterManager.Instance.OnCharacterDataLoaded += OnCharacterLoaded;
             CharacterManager.Instance.LoadFromFirebase();
