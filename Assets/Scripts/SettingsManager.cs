@@ -22,7 +22,6 @@ public class SettingsManager : MonoBehaviour
     public AudioClip winFanfare;
     public AudioClip loseSound;
 
-    [Header("References (Auto-Found)")]
     private GameObject settingsPopup;
     private Slider musicSlider;
     private Slider sfxSlider;
@@ -33,7 +32,7 @@ public class SettingsManager : MonoBehaviour
     private Button closeButtonTop;
     private Button closeButtonBottom;
 
-    [Header("Sprites (Assign in Inspector)")]
+    [Header("Sprites")]
     public Sprite musicUnmutedSprite;
     public Sprite musicMutedSprite;
     public Sprite sfxUnmutedSprite;
@@ -59,13 +58,6 @@ public class SettingsManager : MonoBehaviour
 
     void Start()
     {
-        FindPopupInScene();
-
-        if (settingsPopup != null)
-        {
-            SetupPopup();
-        }
-        // Load saved volumes
         musicSource.volume = PlayerPrefs.GetFloat("MusicVolume", 1f);
         sfxSource.volume = PlayerPrefs.GetFloat("SFXVolume", 1f);
 
@@ -82,26 +74,6 @@ public class SettingsManager : MonoBehaviour
     public void PlayWinFanfare() => sfxSource.PlayOneShot(winFanfare);
     public void PlayLoseSound() => sfxSource.PlayOneShot(loseSound);
 
-
-    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        FindPopupInScene();
-
-        if (settingsPopup != null)
-        {
-            SetupPopup();
-        }
-    }
-
-    void OnEnable()
-    {
-        SceneManager.sceneLoaded += OnSceneLoaded;
-    }
-
-    void OnDisable()
-    {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
-    }
     void FindPopupInScene()
     {
         Canvas[] canvases = FindObjectsOfType<Canvas>();
@@ -120,10 +92,8 @@ public class SettingsManager : MonoBehaviour
                 closeButtonTop = popup.Find("CloseButton")?.GetComponent<Button>();
                 closeButtonBottom = popup.Find("CharacterButton")?.GetComponent<Button>();
 
-                if (musicMuteButton != null)
-                    musicMuteIcon = musicMuteButton.transform.GetChild(0)?.GetComponent<Image>();
-                if (sfxMuteButton != null)
-                    sfxMuteIcon = sfxMuteButton.transform.GetChild(0)?.GetComponent<Image>();
+                musicMuteIcon = musicMuteButton.transform.GetChild(0)?.GetComponent<Image>();
+                sfxMuteIcon = sfxMuteButton.transform.GetChild(0)?.GetComponent<Image>();
 
                 return;
             }
@@ -131,10 +101,8 @@ public class SettingsManager : MonoBehaviour
     }
     void SetupPopup()
     {
-        // Hide popup
         settingsPopup.SetActive(false);
 
-        // Remove old listeners (important when scene changes)
         musicSlider.onValueChanged.RemoveAllListeners();
         sfxSlider.onValueChanged.RemoveAllListeners();
         musicMuteButton.onClick.RemoveAllListeners();
@@ -142,17 +110,15 @@ public class SettingsManager : MonoBehaviour
         closeButtonTop.onClick.RemoveAllListeners();
         closeButtonBottom.onClick.RemoveAllListeners();
 
-        // Load volumes
         if (SettingsManager.Instance != null)
         {
-            musicSlider.value = SettingsManager.Instance.musicSource.volume;
-            sfxSlider.value = SettingsManager.Instance.sfxSource.volume;
+            musicSlider.value = musicSource.volume;
+            sfxSlider.value = sfxSource.volume;
 
             musicPreviousVolume = musicSlider.value > 0 ? musicSlider.value : 1f;
             sfxPreviousVolume = sfxSlider.value > 0 ? sfxSlider.value : 1f;
         }
 
-        // Add listeners
         musicSlider.onValueChanged.AddListener(OnMusicVolumeChanged);
         sfxSlider.onValueChanged.AddListener(OnSFXVolumeChanged);
         musicMuteButton.onClick.AddListener(ToggleMusicMute);
@@ -160,64 +126,43 @@ public class SettingsManager : MonoBehaviour
         closeButtonTop.onClick.AddListener(CloseSettings);
         closeButtonBottom.onClick.AddListener(GoToCharacterSelection);
 
-        // Update visuals
         UpdateMusicMuteIcon();
         UpdateSFXMuteIcon();
     }
 
     public void OpenSettings()
     {
-        // If popup is null, try finding it again
+        FindPopupInScene();
+
         if (settingsPopup == null)
         {
-            FindPopupInScene();
-
-            if (settingsPopup != null)
-            {
-                SetupPopup();
-            }
+            Debug.LogError("SettingsPopup not found in current scene!");
+            return;
         }
 
-        if (settingsPopup != null)
-        {
-            settingsPopup.SetActive(true);
-            PlayButtonClick();
-        }
-        else
-        {
-            Debug.LogError("❌ SettingsPopup STILL null after re-search!");
-        }
+        SetupPopup();
+
+        settingsPopup.SetActive(true);
+        PlayButtonClick();
     }
+
     public void CloseSettings()
     {
-        if (settingsPopup != null)
-        {
-            settingsPopup.SetActive(false);
-            PlayButtonClick();
-        }
-        else
-        {
-            Debug.LogError("❌ settingsPopup is NULL!");
-        }
+        settingsPopup.SetActive(false);
+        PlayButtonClick();
     }
 
     public void GoToCharacterSelection()
     {
-        if (settingsPopup != null)
-        {
-            settingsPopup.SetActive(false);
-        }
-
+        settingsPopup.SetActive(false);
         PlayButtonClick();
 
         SceneManager.LoadScene("CharacterSelection");
-
     }
+
     void OnMusicVolumeChanged(float volume)
     {
-        if (SettingsManager.Instance == null) return;
-
-        SettingsManager.Instance.musicSource.volume = volume;
+        musicSource.volume = volume;
         PlayerPrefs.SetFloat("MusicVolume", volume);
 
         if (volume == 0f)
@@ -235,22 +180,20 @@ public class SettingsManager : MonoBehaviour
 
     void ToggleMusicMute()
     {
-        if (SettingsManager.Instance == null) return;
-
         musicIsMuted = !musicIsMuted;
 
         if (musicIsMuted)
         {
-            musicPreviousVolume = SettingsManager.Instance.musicSource.volume;
-            SettingsManager.Instance.musicSource.volume = 0f;
+            musicPreviousVolume = musicSource.volume;
+            musicSource.volume = 0f;
         }
         else
         {
-            SettingsManager.Instance.musicSource.volume = musicPreviousVolume;
+            musicSource.volume = musicPreviousVolume;
         }
 
-        musicSlider.value = SettingsManager.Instance.musicSource.volume;
-        PlayerPrefs.SetFloat("MusicVolume", SettingsManager.Instance.musicSource.volume);
+        musicSlider.value = musicSource.volume;
+        PlayerPrefs.SetFloat("MusicVolume", musicSource.volume);
 
         UpdateMusicMuteIcon();
         PlayButtonClick();
@@ -258,19 +201,12 @@ public class SettingsManager : MonoBehaviour
 
     void UpdateMusicMuteIcon()
     {
-        if (musicMuteIcon == null) return;
-
-        bool muted = musicIsMuted || musicSlider.value == 0f;
-
-        musicMuteIcon.sprite = muted ? musicMutedSprite : musicUnmutedSprite;
-        musicMuteIcon.color = Color.white; // keep sprite color normal
+        musicMuteIcon.sprite = musicIsMuted ? musicMutedSprite : musicUnmutedSprite;
     }
 
     void OnSFXVolumeChanged(float volume)
     {
-        if (SettingsManager.Instance == null) return;
-
-        SettingsManager.Instance.sfxSource.volume = volume;
+        sfxSource.volume = volume;
         PlayerPrefs.SetFloat("SFXVolume", volume);
 
         if (volume == 0f)
@@ -291,22 +227,20 @@ public class SettingsManager : MonoBehaviour
 
     void ToggleSFXMute()
     {
-        if (SettingsManager.Instance == null) return;
-
         sfxIsMuted = !sfxIsMuted;
 
         if (sfxIsMuted)
         {
-            sfxPreviousVolume = SettingsManager.Instance.sfxSource.volume;
-            SettingsManager.Instance.sfxSource.volume = 0f;
+            sfxPreviousVolume = sfxSource.volume;
+            sfxSource.volume = 0f;
         }
         else
         {
-            SettingsManager.Instance.sfxSource.volume = sfxPreviousVolume;
+            sfxSource.volume = sfxPreviousVolume;
         }
 
-        sfxSlider.value = SettingsManager.Instance.sfxSource.volume;
-        PlayerPrefs.SetFloat("SFXVolume", SettingsManager.Instance.sfxSource.volume);
+        sfxSlider.value = sfxSource.volume;
+        PlayerPrefs.SetFloat("SFXVolume", sfxSource.volume);
 
         UpdateSFXMuteIcon();
 
@@ -316,12 +250,7 @@ public class SettingsManager : MonoBehaviour
 
     void UpdateSFXMuteIcon()
     {
-        if (sfxMuteIcon == null) return;
-
-        bool muted = sfxIsMuted || sfxSlider.value == 0f;
-
-        sfxMuteIcon.sprite = muted ? sfxMutedSprite : sfxUnmutedSprite;
-        sfxMuteIcon.color = Color.white;
+        sfxMuteIcon.sprite = sfxIsMuted ? sfxMutedSprite : sfxUnmutedSprite;
     }
 
 }
